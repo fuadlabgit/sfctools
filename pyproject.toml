@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "sfctools"
+version = "0.7.4"
+description =   "Framework for stock-flow consistent agent-based modeling, being developed at the German Aerospace Center (DLR) for and in the scientific context of energy systems analysis, however, it is widely applicable in other scientific fields."
+
+authors = ["Thomas Baldauf, Benjamin Fuchs <thomas.baldauf@dlr.de, benjamin.fuchs@dlr.de>"]
+license = "MIT"
+maintainers = ["Thomas Baldauf <thomas.baldauf@dlr.de>"]
+homepage = 'https://gitlab.com/dlr-ve/esy/sfctools/framework'
+documentation = 'https://sfctools-framework.readthedocs.io/en/latest/'
+readme = 'README.md'
+keywords = ["stock-flow-consistent","agent-based","agent","macroeconomics","computational economics"]
+
+packages = [
+    { include = "sfctools" },
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pandas = "^1.0"
+numpy = "^1.20.1"
+setuptools = "^60.0.0"
+poetry = "^1.1.6"
+wheel = "^0.36.2"
+attrs = "^19" # "19.3.0"
+cattrs = "1.0.0"
+matplotlib = "^3.4"
+pyyaml = "^6.0"
+seaborn = "^0.11.2"
+networkx = "^2.6.3"
+graphviz = "^0.19"
+pydot = "^1.4"
+pyperclip = "^1.8"
+pdflatex = "^0.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
