@@ -5,7 +5,7 @@ Sfctools is a lightweight and easy-to-use Python framework for agent-based macro
 
 ## Installation of the Framework
 
-(Lazy version) In a terminal of your choice, type: 
+(**Lazy version**) In a terminal of your choice, type: 
 
     pip install sfctools 
 
@@ -13,13 +13,13 @@ see https://pypi.org/project/sfctools/
 
 this will install the version available on pypi.
 
-(Latest version) To get the version stored in this repository, you need poetry. Once you have poetry installed, run poetry build. 
+(**Latest version**) To get the version stored in this repository, you need poetry. Once you have poetry installed, run poetry build. 
 In the dist folder, you will find the wheel file necessary to install the framework. 
 
 
 ## Installation of the GUI
 
-(Recommended way) The gui is already shipped with the framework. Just open Python and type the following commands
+(**Recommended way**) The gui is already shipped with the framework. Just open Python and type the following commands
 
     from sfctools.gui import Gui
     g = GUi()
@@ -27,7 +27,7 @@ In the dist folder, you will find the wheel file necessary to install the framew
 
 this will open the gui for you. 
 
-(Alternative way) If you like to start the gui from another environment directly, you can also copy the gui/attune folder to an arbitrary folder and just navigate to src/. In src, run python on qtattune.py. 
+(**Alternative way**) If you like to start the gui from another environment directly, you can also copy the gui/attune folder to an arbitrary folder and just navigate to src/. In src, run python on qtattune.py. 
 
 
 ## Usage
