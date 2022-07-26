@@ -1,0 +1,13 @@
+agents:
+  s: "$[AGENT] s\n\nasdlk\nasldfja\nsdlkjasd\nlaksdfjasdlfkj\xF6aslkfjasd\xF6\n\n\n\
+    $[END]\n"
+box_positions:
+  s:
+    x: 673
+    y: 322
+mainloop: ''
+settings: "\nmetainfo:\n\tauthor: your name here\n\tdate: 2022\n\tinfo: example settings\n\
+  \nparams:\n\t- name: Cash\n\t  depreciation: 0.0\n\t  price: p\n\t  value: 1.0\n\
+  \t  unit: Euro\n\t  description: numeraire of the simulation\n\nhyperparams:\n \
+  \      - name: example\n         value: 42.0\n         description: an example parameter\n"
+transactions: []

@@ -1,0 +1,9 @@
+metainfo :
+    author: Example Author
+    date: November 2021
+    info: settings for example project
+
+hyperparams:
+    - name: beta
+      value: 0.05
+      description: just an example parameter

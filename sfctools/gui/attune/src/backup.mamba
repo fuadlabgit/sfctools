@@ -1,0 +1,885 @@
+agents:
+  bank: "$[AGENT] bank\n\n+[INIT]\n$.iC = 0.03 # interest on credits \n$.iL = 0.01\
+    \ # interest on deposits\n\n+[ACCOUNTING]\n<.> \"Cash\", ASSETS, 50.0\n<.> \"\
+    Equity\", EQUITY, 50.0\n+[ENDACCOUNTING]\n\n+[ENDINIT]\n\n\n+[PARAM] lev_target,\
+    \ i_cb, gamma1, gamma2,alpha\n\t# lev_target: leverage target of this bank\n\t\
+    # alpha: learing parameter\n\t# gamma1:  credit supply parameter\n\t# gamma2:\
+    \  credit supply parameter\n\n\n+[KNOWS] firm, household\n\n+[FUN] target_cred_supply\n\
+    # target credit supply of a bank \n\nnw = $.balance_sheet.net_worth\ndep = BALANCE?(\"\
+    Deposits\", ASSETS)\nM = BALANCE?(\"CBCredits\", LIABILITIES)\n\nk_bar = $.gamma2\
+    \ * nw + dep + M\nk_hat = $.gamma1* nw\n\nC_target = min(k_hat, k_bar)\nreturn\
+    \ C_target\n+[ENDFUN]\n\n+[FUN] supply_of_credits\ncurrent_credits = BALANCE?(\"\
+    Credits\", ASSETS)\nreturn $.target_cred_supply() - current_credits\n+[ENDFUN]\n\
+    \n\n+[FUN] set_irate\n# set interest rate \ndC = $.supply_of_credits()\nprint(\"\
+    Cred. supply\", $.target_cred_supply(),  BALANCE?(\"Credits\", ASSETS))\nif dC\
+    \ > 0:\n\t$.iC = np.random.uniform(0,$.alpha)\nelif dC == 0:\n\t$.iC = np.random.uniform(-$.alpha,\
+    \ 0)\nelse:\n\traise RuntimeError()\n+[ENDFUN]\n\n\n\n+[FUN] demand_for_deposits\n\
+    lev_target = $.lev_target / (1-$.lev_target)\ncb_credits = BALANCE?(\"CBCredits\"\
+    , LIABILITIES)\n\nreturn lev_target * $.net_worth - cb_credits\n+[ENDFUN]\n\n\n\
+    \n+[FUN] set_drate\ndeposits = BALANCE?(\"Deposits\", ASSETS)\ndDep = $.demand_for_deposits()\
+    \ - deposits\nprint(\"dDep\", dDep, $.demand_for_deposits(), deposits)\n\nif dDep\
+    \ == 0:\n\t$.iD *= (1-np.random.uniform(0,$.alpha))\nelif dDep > 0:\n\t$.iD *=\
+    \ (1+np.random.uniform(0,$.alpha))\n\t$.iD = min($.i_cb, $.iD)\nelse:\n\traise\
+    \ RuntimeError()\n+[ENDFUN]\n\n\n\n$[END]\n"
+  centralbank: '$[AGENT] centralbank
+
+
+
+    +[INIT]
+
+
+    +[ACCOUNTING]
+
+    <.> "Cash", ASSETS, 10.0
+
+    <.> "Equity", EQUITY, 10.0
+
+    +[ENDACCOUNTING]
+
+
+    +[ENDINIT]
+
+
+
+    $[END]
+
+    '
+  credit: "$[CLASS] credit\n\n\n+[INIT] \n$.t = 0\n$.r = None\n$.bank = None \n$.agent\
+    \ = None\n+[ENDINIT]\n\n+[PARAM] creditT\n\n+[FUN] setup (agent,bank,q,r):\n#\
+    \ agent: client \n# bank: supplier of credit\n# q: amount\n# r: interest rate\
+    \ (fixed)\n# T: runtime\n\n$.agent = agent \n$.bank = bank\n$.r = r \n$.q = q\
+    \ \nT = $.creditT\n$.T = T\n$.payoff_rate = q/T\n+[ENDFUN]\n\n\n+[FUN] update\n\
+    \n# 1. agent pays off credit \n<~~> \n\n# 2. agent pays interest of credit\n<~~>\n\
+    +[ENDFUN]\n\n\n\n+[FUN] delete\npass \n# NOTE many credis will increase storage\
+    \ extremely, think of other solution for very large simulations\n+[ENDFUN]\n\n\
+    \n$[END]\n"
+  creditmarket: "$[MARKET] creditmarket\n\n\n+[KNOWS] firm, bank\n\n\n+[PARAM] pool_size\n\
+    \t# size of pool of potential matches on market \n\n+[FUN] setup\n$.clear()\n\
+    for b in @bank:\n\t$.add_supplier(b)\nfor f in @firm:\n\t$.add_demander(f)\n+[ENDFUN]\n\
+    \n\n+[FUN] rematch\n\nS = $.supply_list.copy()\nD = $.demand_list.copy()\n\ni\
+    \ = 0\nmaxiter = 10\nwhile len(D) > 0 and len(S) > 0 and i  < maxiter:\n\n\t#\
+    \ random demand agent is chosen\n\tdemander = np.random.choice(D)\n\n\tif demander.demand_for_credits()\
+    \ > 0: # TODO fix this\n \n\t\t# supplier\n\t\tsuppliers = np.random.choice(S,\
+    \ int($.pool_size))\n\t\t\n\t\t# sort list of suppliers according to criterion\
+    \ \n\t\tsuppliers =sorted(suppliers,key=lambda x: x.iC, reverse=True)\n\t\t\n\t\
+    \tsuccess = False \n\t\tk = 0\n\t\twhile k < len(suppliers) and not success:\n\
+    \t\t\tif suppliers[k].supply_of_credits() > 0: # TODO fix this \n\t\t\t\tsuccess\
+    \ = True \n\t\t\t\tS.remove(suppliers[k])\n\t\t\t\tD.remove(demander)\n\t\n\t\t\
+    \t\tq = min(demander.demand_for_credits() , suppliers[k].supply_of_credits())\n\
+    \t\t\t\t<~~> cred(suppliers[k],demander,q)\n\t\t\t\t\n\t\t\t\t\n\n\t\t\tk += 1\n\
+    \n\ti += 1 \n\n\n\n+[ENDFUN]\n\n\n\t\n\n$[END]\n"
+  depositmarket: "$[MARKET] depositmarket\n\n\n+[KNOWS] household, bank\n\n\n\n+[FUN]\
+    \ setup\n$.clear()\nfor b in @bank:\n\t$.add_demander(b)\nfor h in @household:\n\
+    \t$.add_supplier(h)\n+[ENDFUN]\n\n+[FUN] rematch\n\nS = $.supply_list.copy()\n\
+    D = $.demand_list.copy()\n\ni = 0\nmaxiter = 10\nwhile len(D) > 0 and len(S) >\
+    \ 0 and i  < maxiter:\n\t\n\t# random demand agent is chosen\n\tdemander = np.random.choice(D)\n\
+    \t\n\tif demander.demand_for_deposits() > 0: # TODO fix this\n \t\t\n\t\t# supplier\n\
+    \t\tsuppliers = np.random.choice(S, int($.pool_size))\n\t\t\n\t\t# sort list of\
+    \ suppliers according to criterion \n\t\tsuppliers = sorted(suppliers,key=lambda\
+    \ x: x.iD, reverse=True)\n\t\t\n\t\tsuccess = False \n\t\tk = 0\n\t\twhile k <\
+    \ len(suppliers) and not success:\n\t\t\tif demander.iD >= suppliers[k].iD:\n\t\
+    \t\t\tsuccess = True \n\t\t\t\t\n\t\t\t\tS.remove(suppliers[k])\n\t\t\t\tD.remove(demander)\n\
+    \t\t\t\t\n\t\t\t\t# TODO add link in this market\n\t\t\t\n\t\t\tk += 1\n\t\n\t\
+    i += 1 \n\n# after each full market iteration, update agents\n\nfor household\
+    \ in $.supply_list:\n\thousehold.minimum_interest()\n\nfor bank in $.demand_list:\n\
+    \tbank.set_drate()\n+[ENDFUN]\n\n$[END]\n"
+  firm: "$[AGENT] firm\n\n+[INIT]\n$.workers = []\n$.inventory = 0.0\n$.sales = 0.0\
+    \ # stores current sles \n$.p = 1.0 # selling price \n\n+[ACCOUNTING]\n<.> \"\
+    Cash\", ASSETS, 10.0\n<.> \"Equity\", EQUITY, 10.0\n+[ENDACCOUNTING]\n\n+[ENDINIT]\n\
+    \n\n+[PARAM] lev_target_firm, icr_target , alpha, phi_f, psi_f\n\t# lev_target:\
+    \ initial leverage target of firms\n\t# icr_target:  target interest coverage\
+    \ rate \n\t# alpha: interest rate learning parameter \n\t# phi_f: <= 1 risk aversion\n\
+    \t# psi_f: productivity factor of labor\n\n+[KNOWS] household\n\n+[FUN] demand_for_credits\n\
+    return $.net_worth* $.lev_target_firm\n+[ENDFUN]\n\n\n+[FUN] set_leverage\n# update\
+    \ the leverage target according to icr \ngross_income  = $.income_statement.noi\n\
+    noi = $.income_statement.noi\ninterest = INCOME?(INTEREST,\"int\")\n\nif interest\
+    \ > 0:\n\ticr = (gross_income + noi) / interest\nelse:\n\ticr = np.inf\n\nif icr\
+    \ > $.icr_target:\n\t$.lev_target_firm *= (1+np.random.uniform(0,$.alpha)) \n\
+    elif icr < $.icr_target:\n\t$.lev_target_firm *= (1-np.random.uniform(0,$.alpha))\n\
+    +[ENDFUN]\n\n\n+[FUN] labor_demand\n# compute target labor\n\n# compute wages\
+    \ payable\nwages_payable = $.net_income\n\n$.L_target = $.phi_f * wages_payable\n\
+    \nreturn $.L_target - len($.workers)\n+[ENDFUN]\n\n\n+[FUN] hire_worker\n$.workers.append(w)\n\
+    w.employer = self \n+[ENDFUN]\n\n\n+[FUN] workforce\nreturn len($.workers)\n+[ENDFUN]\n\
+    \n\n+[FUN] fire_random\nworker = np.random.choice($.workers)\n$.workers.remove(worker)\n\
+    worker.employer = None \n+[ENDFUN]\n\n\n+[FUN] fire_excess_workers\nexcess = $.workforce()\
+    \ - $.labor_demand()\nif excess > 0:\n\tn_fire = int(0.5*excess)\n\tif n_fire\
+    \ >= 1:\n\t\tfor i in range(n_fire):\n\t\t\t$.fire_random()\n+[ENDFUN]\n\n\n+[FUN]\
+    \ produce\n# production equation\n$.Y = $.psi_f * $.workforce()\n\n$.target_inventory\
+    \ = $.inventory - $.sales\n$.inventory += $.Y\n+[ENDFUN]\n\n\n+[FUN] selling_price\n\
+    # update seeling price according to inventory\nif $.inventory == 0 and $.Y > 0:\n\
+    \t$.p *= (1+np.random.uniform($.alpha))\n\nelif $.inventory > 0 and $.Y == 0:\n\
+    \t$.p *= (1-np.random.uniform($.alpha))\n+[ENDFUN]\n\n\n$[END]\n"
+  goodsmarket: "$[MARKET] goodsmarket\n\n\n+[KNOWS] household, firm\n\n\n+[FUN] setup\n\
+    $.clear()\nfor h in @household:\n\t$.add_demander(h)\nfor f in @firm:\n\t$.add_supplier(f)\n\
+    +[ENDFUN]\n\n+[FUN] rematch\n\nS = $.supply_list.copy()\nD = $.demand_list.copy()\n\
+    \ni = 0\nmaxiter = 10\nwhile len(D) > 0 and len(S) > 0 and i  < maxiter:\n\t\n\
+    \t# random demand agent is chosen\n\tdemander = np.random.choice(D)\n\t\n\tif\
+    \ demander.consumption_target() > 0: # TODO fix this\n \t\t\n\t\t# supplier\n\t\
+    \tsuppliers = np.random.choice(S, int($.pool_size))\n\t\t\n\t\t# sort list of\
+    \ suppliers according to criterion \n\t\tsuppliers = sorted(suppliers,key=lambda\
+    \ x: x.p, reverse=True)\n\t\t\n\t\tsuccess = False \n\t\tk = 0\n\t\twhile k <\
+    \ len(suppliers) and not success:\n\t\t\tif not suppliers[k].employed(): \n\t\t\
+    \t\tsuccess = True \n\t\t\t\t\n\t\t\t\tif suppliers[k].inventory == 0:\n\t\t\t\
+    \t\tS.remove(suppliers[k])\n\t\t\t\t\n\t\t\t\tD.remove(demander)\n\t\t\t\t\n\t\
+    \t\t\t# TODO add link in this market\n\t\t\t\n\t\t\tk += 1\n\t\n\ti += 1 \n\n\
+    # after each full market iteration, update agents\n\nfor firm in $.supply_list:\n\
+    \tfirm.selling_price()\n+[ENDFUN]\n\n$[END]\n"
+  government: "$[AGENT] government\n\n+[PARAM] taxrate_income, taxrate_wealth\n\n\
+    +[KNOWS] household, firm, kfirm\n\n+[FUN] collect_tax\n\n# income tax \nincome_tax_payers\
+    \ = @household + @firm + @kfirm\nfor agent in income_tax_payers:\n\tif agent.income_statement.net_income\
+    \ > 0:\n\t\t# TODO pay tax \n\t\tpass \n\n\n# wealth tax \nwealth_tax_payers =\
+    \ @household + @firm + @kfirm\nfor agent in wealth_tax_payers:\n\tif agnet.net_worth\
+    \ > 0:\n\t\t# TODO pay tax \n\t\tpass\n\n+[ENDFUN]\n\n$[END]\n"
+  household: "$[AGENT] household\n\n+[INIT]\n$.iD = 0.05 # minimum accepted deposit\
+    \ rate \n$.age = 1 # household age\n\n+[ACCOUNTING]\n<.> \"Cash\", ASSETS, 10.0\n\
+    <.> \"Equity\", EQUITY, 10.0\n+[ENDACCOUNTING]\n\n+[ENDINIT]\n\n+[PARAM] w, alpha,\
+    \ c1, c2\n\t# w: initial wage \n\t# alpha: wage setting parameter \n\t# c1: propensity\
+    \ to consume income\n\t# c2: propensity to consume wealth\n\n\n+[KNOWS] firm \n\
+    \n\n+[FUN] update_age\n$.age += 1 \n+[ENDFUN]\n\n\n+[FUN] labor_supply\n# households\
+    \ supply always 1.0 unit of real labor\nraise RuntimeError()\n+[ENDFUN]\n\n\n\
+    +[FUN] employed\nif $.employer is None:\n\treturn False\nreturn True \n+[ENDFUN]\n\
+    \n\n+[FUN] set_reservation_wage\nif $.employed():\n\t$.w *= 1+ np.random.uniform(0,$.alpha)\n\
+    else:\n\t$.w *= 1- np.random.uniform(0,$.alpha)\n+[ENDFUN]\n\n\n+[FUN] consumption_target\n\
+    # desired consumption level \nnet_income = $.income_statement.net_income\ndeposits\
+    \ = BALANCE?(ASSETS, \"Deposits\")\nreturn $.c1 * net_income + $.c2 * deposits\n\
+    +[ENDFUN]\n\n\n+[FUN] deposit_target\nreturn $.income_statement.net_income\n+[ENDFUN]\n\
+    \n\n+[FUN] minimum_interest\ndeposits = BALANCE?(ASSETS,\"Deposits\")\n\nif deposits\
+    \ == 0:\n\t$.iD *= 1 - np.random.uniform(0,$.alpha)\nelif deposits > 0:\n\t$.iD\
+    \ *= 1+ np.random.unifom(0,$.alpha)\n\n+[ENDFUN]\n\n\n$[END]\n"
+  labormarket: "$[MARKET] labormarket\n\n\n\n+[KNOWS] firm, household\n\n\n+[FUN]\
+    \ setup\n$.clear()\nfor h in @household:\n\t$.add_supplier(h)\nfor f in @firm:\n\
+    \t$.add_demander(f)\n+[ENDFUN]\n\n\n+[FUN] rematch\n\nS = $.supply_list.copy()\n\
+    D = $.demand_list.copy()\n\ni = 0\nmaxiter = 10\nwhile len(D) > 0 and len(S) >\
+    \ 0 and i  < maxiter:\n\t\n\t# random demand agent is chosen\n\tdemander = np.random.choice(D)\n\
+    \t\n\tif demander.labor_demand() >= 1: # TODO fix this\n \t\t\n\t\t# supplier\n\
+    \t\tsuppliers = np.random.choice(S, int($.pool_size))\n\t\t\n\t\t# sort list of\
+    \ suppliers according to criterion \n\t\tsuppliers = sorted(suppliers,key=lambda\
+    \ x: x.w, reverse=True)\n\t\t\n\t\tsuccess = False \n\t\tk = 0\n\t\twhile k <\
+    \ len(suppliers) and not success:\n\t\t\tif not suppliers[k].employed(): \n\t\t\
+    \t\tsuccess = True \n\t\t\t\tS.remove(suppliers[k])\n\t\t\t\tdemander.hire_worker()\n\
+    \t\t\t\t\n\t\t\t\tif demander.labor_demand() < 1:\n\t\t\t\t\tD.remove(demander)\n\
+    \t\t\t\t\n\t\t\t\t# TODO add link in this market\n\t\t\t\n\t\t\tk += 1\n\t\n\t\
+    i += 1 \n\n# after each full market iteration, update agents\nfor worker in $.supply_list:\n\
+    \tworker.set_reservation_wage()\n\nfor firm in $.demand_list:\n\tfirm.fire_excess_workers()\n\
+    +[ENDFUN]\n\n$[END]\n"
+box_positions:
+  bank:
+    x: 97
+    y: 69
+  bd:
+    x: 205
+    y: 210
+  ben:
+    x: 714
+    y: 97
+  bnd_b:
+    x: 488
+    y: 201
+  bnd_cb:
+    x: 653
+    y: 471
+  bo:
+    x: 255
+    y: 30
+  bo_f:
+    x: 304
+    y: 216
+  cbprof:
+    x: 615
+    y: 427
+  centralbank:
+    x: 430
+    y: 513
+  cr_b:
+    x: 267
+    y: 426
+  cr_f:
+    x: 127
+    y: 244
+  credit:
+    x: 326
+    y: 584
+  creditmarket:
+    x: 114
+    y: 594
+  crpo:
+    x: 44
+    y: 238
+  dep_h:
+    x: 291
+    y: 96
+  depositmarket:
+    x: 195
+    y: 512
+  des:
+    x: 87
+    y: 240
+  div_b:
+    x: 300
+    y: 70
+  div_f:
+    x: 316
+    y: 252
+  firm:
+    x: 119
+    y: 369
+  goodsmarket:
+    x: 196
+    y: 598
+  government:
+    x: 775
+    y: 316
+  household:
+    x: 497
+    y: 51
+  i_b:
+    x: 536
+    y: 178
+  i_c:
+    x: 169
+    y: 240
+  i_d:
+    x: 310
+    y: 112
+  icb_b:
+    x: 605
+    y: 463
+  invb:
+    x: 447
+    y: 228
+  invbh:
+    x: 268
+    y: 52
+  invf:
+    x: 489
+    y: 315
+  invfh:
+    x: 288
+    y: 195
+  labormarket:
+    x: 113
+    y: 513
+  prnt:
+    x: 441
+    y: 468
+  t_f:
+    x: 504
+    y: 382
+  t_h:
+    x: 679
+    y: 205
+  w:
+    x: 354
+    y: 263
+  w_g:
+    x: 616
+    y: 174
+  wt_f:
+    x: 439
+    y: 361
+  wt_h:
+    x: 697
+    y: 175
+mainloop: "\n\"\"\"\nThis the main ABM Simulation file\nCretaed with MAMBA GUI\n\n\
+  @author: Thomas Baldauf\n@date: 28.03.2022\n\"\"\"\n\nfrom sfctools import Agent,\
+  \ World, Settings, Clock, FlowMatrix\nfrom bank import Bank\nfrom creditmarket import\
+  \ Creditmarket\nfrom depositmarket import Depositmarket\nfrom firm import Firm\n\
+  from goodsmarket import Goodsmarket\nfrom government import Government\nfrom household\
+  \ import Household\nfrom labormarket import Labormarket\nfrom centralbank import\
+  \ Centralbank\n\nSettings().read(\"settings.yml\") # read settings file\n\n\"\"\"\
+  \nSimulation parameters\n\"\"\"\n\n# number of agents to be created\nN_Bank = 3\n\
+  N_Firm = 10\nN_Household = 20\n\n\n# create Agents: \n\n# number of simulation steps\n\
+  T = 100\n\n\nbanks = [Bank() for i in range(N_Bank)]\nfirms = [Firm() for i in range(N_Firm)]\n\
+  households = [Household() for i in range(N_Household)]\ngovernment = Government()\n\
+  central_bank = Centralbank()\n\nlabormarket = Labormarket()\ngoodsmarket = Goodsmarket()\n\
+  depositmarket = Depositmarket()\ncreditmarket = Creditmarket()\n\n# inter-link agents\
+  \ \n[i.link() for i in banks + firms + households]\ngovernment.link()\n# central_bank.link()\n\
+  \nlabormarket.link()\ngoodsmarket.link()\ncreditmarket.link()\ndepositmarket.link()\n\
+  \nlabormarket.setup()\ngoodsmarket.setup()\ncreditmarket.setup()\ndepositmarket.setup()\n\
+  \n\ndef iter():\n\t\"\"\"\n\tthis is one iteration\n\t\"\"\"\n\n\t# 1. Households\
+  \ update age\n\tfor house in households:\n\t\thouse.update_age()\n\n\t# 2. Firms\
+  \ update their leverage target and their demand for credits. Banks update their\
+  \ (bank-specific) interest rate and a desired investment into government securities\
+  \ (vs. credit supply). Banks and Firms interact in the credit market\n\t\n\tfor\
+  \ firm in firms:\n\t\tfirm.set_leverage()\n\n\tfor bank in banks:\n\t\tbank.set_irate()\n\
+  \t\n\tcreditmarket.rematch()\n\n\t# 3. The government hires public workers and collects\
+  \ taxes\n\n\n\t\n\t# 4. Banks buy government securities using their excess liquidity.\
+  \ The Central Bank purchases the remaining securities not bought by banks\n\n\n\n\
+  \t# 5. Firms update their demand for labor. Households update their reservation\
+  \ wage. Firms and households interact in the labor market\n\n\n\n\t# 6. Firms run\
+  \ their production and their selling price. Households update their desired level\
+  \ of consumption. Firms and households interact in the goods market.\n\n\n\n\t#\
+  \ 7. Households determine their preference for liquidity vs. deposits. Banks and\
+  \ households interact in the deposit market.\n\n\n\n\t# 8. The central bank injects\
+  \ money into the economy via bank lending.\n\n\n\n\t# 9. Schumpeterian Destruction:\
+  \ the cy algorithms are run for each of the bankrupted agents\n\n\n\n\ndef run():\n\
+  \t\"\"\"\n\tthis is the main simulation loop \n\t\"\"\"\n\t\n\tfor i in range(T):\n\
+  \t\titer()\n\t\t\n\t\t# TODO write outputs here ...\n\t\t\n\t\tClock().tick()\n\n\
+  if __name__ == \"__main__\":\n\trun() # runs main loop \n\t\n\tprint(FlowMatrix().to_string())\n"
+settings: "\nmetainfo:\n    author: Thomas\n    date: 2022\n    info: ricetti-replica\n\
+  \nhyperparams:\n       - name: alpha\n         value: 0.2\n         description:\
+  \ learning speed\n\n# HOUSEHOLD \n       - name: w\n         value: 1.0\n      \
+  \   description: initial wage\n       - name: c1\n         value: 0.8\n        \
+  \ description: propensity to consume income\n       - name: c2\n         value:\
+  \ 0.2\n         description: propensity to consume wealth\n\n# BANK\n       - name:\
+  \ lev_target\n         value: 2.0\n         description: leverage target\n     \
+  \  - name: i_cb\n         value: 0.03\n         description: central bank interest\
+  \ rate\n       - name: gamma1\n         value: 0.5\n         description: credit\
+  \ supply parameter\n       - name: gamma2\n         value: 0.5\n         description:\
+  \ credit supply parameter\n\n# FIRM \n       - name: lev_target_firm\n         value:\
+  \ 1.5\n         description: target leverage of firms\n       - name: icr_target\n\
+  \         value: 0.8\n         description: target interest coverage ratio\n   \
+  \    - name: phi_f\n         value: 0.8\n         description: risk aversion\n \
+  \      - name: psi_f\n         value: 0.9\n         description: productivity factor\
+  \ of labor\n\n# CREDIT \n       - name: creditT\n         value: 10\n         description:\
+  \ duration of credits\n\n# GOVERNMENT\n       - name: taxrate_income\n         value:\
+  \ 0.2\n         description: income tax\n       - name: taxrate_wealth\n       \
+  \  value: 0.2\n         description: wealth tax\n\n# MARKETS\n       - name: pool_size\n\
+  \         value: 2\n         description: decentralized matching random choice size\
+  \ \n\n"
+transactions:
+- a1: '- Cash'
+  a2: + Cash
+  agent1: firm
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: w
+  shortname: wag
+  subject: wages
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: firm
+  agent2: government
+  cashflow1: None
+  cashflow2: None
+  description: income tax
+  e1: '- Equity'
+  e2: + Equity
+  income1: Tax
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: t_f
+  shortname: taxif
+  subject: taxes
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: government
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Tax
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: t_h
+  shortname: taxih
+  subject: taxes
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: government
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Tax
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: wt_h
+  shortname: taxwh
+  subject: taxes
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: firm
+  agent2: government
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Tax
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: wt_f
+  shortname: taxwf
+  subject: taxes
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Non-Op. Income
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: i_b
+  shortname: ibond
+  subject: interest_bonds
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: bank
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Non-Op. Income
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: i_d
+  shortname: idep
+  subject: interest_deposits
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: centralbank
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Non-Op. Income
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: icb_b
+  shortname: ibondcb
+  subject: interest_bonds
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: firm
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Interest
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: i_c
+  shortname: icred
+  subject: interest_credits
+  uni-directional: 'True'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Loss
+  income2: Gain
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: bo
+  shortname: bail
+  subject: bailout
+  uni-directional: 'True'
+- a1: '- Cash
+
+    + Credits'
+  a2: + Cash
+  agent1: bank
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: ''
+  l2: + Credits
+  log transaction: true
+  quantity: cr_f
+  shortname: cred
+  subject: credits
+  uni-directional: 'True'
+- a1: '- Cash
+
+    + Credits'
+  a2: + Cash
+  agent1: centralbank
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: ''
+  l2: + Credits
+  log transaction: true
+  quantity: cr_b
+  shortname: cred_cb
+  subject: credits
+  uni-directional: 'True'
+- a1: + Cash
+  a2: '+ Bonds
+
+    - Cash'
+  agent1: government
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: + Bonds
+  l2: ''
+  log transaction: true
+  quantity: bnd_b
+  shortname: bonds
+  subject: bonds
+  uni-directional: 'True'
+- a1: + Cash
+  a2: '+ Bonds
+
+    - Cash'
+  agent1: government
+  agent2: centralbank
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: + Bonds
+  l2: ''
+  log transaction: true
+  quantity: bnd_cb
+  shortname: bonds_cb
+  subject: bonds
+  uni-directional: 'True'
+- a1: '- Cash
+
+    + Deposits'
+  a2: + Cash
+  agent1: household
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: ''
+  l2: + Deposits
+  log transaction: true
+  quantity: dep_h
+  shortname: dep_h
+  subject: deposits
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: bank
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Nontax. Loss
+  income2: Non-Op. Income
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: div_b
+  shortname: div_b
+  subject: dividends
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: firm
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Nontax. Loss
+  income2: Non-Op. Income
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: div_f
+  shortname: div_f
+  subject: dividends
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Loss
+  income2: Gain
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: bo_f
+  shortname: bail_f
+  subject: bailout
+  uni-directional: 'True'
+- a1: + Cash
+  a2: ''
+  agent1: centralbank
+  agent2: centralbank
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: + Currency
+  l2: ''
+  log transaction: 'True'
+  quantity: prnt
+  shortname: prnt
+  subject: money_printing
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: '+ Cash
+
+    - Credits'
+  agent1: firm
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: ''
+  e2: ''
+  income1: None
+  income2: None
+  kind: KA->KA
+  l1: '- Credits'
+  l2: ''
+  log transaction: true
+  quantity: crpo
+  shortname: crpo
+  subject: credit_payoff
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: w_g
+  shortname: wagg
+  subject: wages
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: invf
+  shortname: invf
+  subject: investment
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: invb
+  shortname: invb
+  subject: investment
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: bank
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: invbh
+  shortname: invbh
+  subject: investment
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: household
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Revenue
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: invfh
+  shortname: invfh
+  subject: investment
+  uni-directional: 'False'
+- a1: '- Credits'
+  a2: ''
+  agent1: bank
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Loss
+  income2: Gain
+  kind: KA->KA
+  l1: ''
+  l2: '- Credits'
+  log transaction: true
+  quantity: des
+  shortname: des
+  subject: debt_equity_swap
+  uni-directional: 'False'
+- a1: '- Credits'
+  a2: ''
+  agent1: bank
+  agent2: firm
+  cashflow1: None
+  cashflow2: None
+  description: bank loses some of the credits
+  e1: '- Equity'
+  e2: ''
+  income1: Loss
+  income2: Gain
+  kind: KA->KA
+  l1: ''
+  l2: '- Credits
+
+    + BadDebt'
+  log transaction: 'True'
+  quantity: bd
+  shortname: bd
+  subject: bad_debt
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: centralbank
+  agent2: government
+  cashflow1: None
+  cashflow2: None
+  e1: '- Equity'
+  e2: + Equity
+  income1: Loss
+  income2: Gain
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: true
+  quantity: cbprof
+  shortname: cbprof
+  subject: cbprofits
+  uni-directional: 'False'
+- a1: '- Cash'
+  a2: + Cash
+  agent1: government
+  agent2: household
+  cashflow1: None
+  cashflow2: None
+  description: ''
+  e1: '- Equity'
+  e2: + Equity
+  income1: Expense
+  income2: Nontax. Profit
+  kind: KA->KA
+  l1: ''
+  l2: ''
+  log transaction: 'True'
+  quantity: ben
+  shortname: ben
+  subject: benefit
+  uni-directional: 'False'
