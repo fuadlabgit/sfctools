@@ -13,7 +13,7 @@ see https://pypi.org/project/sfctools/
 
 this will install the version available on pypi.
 
-(**Latest version**) To get the version stored in this repository, you need poetry. Once you have poetry installed, run poetry build. 
+(**Latest version**) To get the version stored in this repository, you need poetry (see https://python-poetry.org/). Once you have poetry installed, run poetry build. 
 In the dist folder, you will find the wheel file necessary to install the framework. 
 
 
