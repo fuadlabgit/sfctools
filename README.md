@@ -32,7 +32,7 @@ this will open the gui for you.
 
 ## Usage
 
-Agents are a bit like objects in object-oriented programming. See https://readthedocs.org/projects/sfctools-framework/ for more documentation.
+Agents are a bit like objects in object-oriented programming. See https://sfctools-framework.readthedocs.io/en/latest/ for more documentation.
 
 Example code:
 
