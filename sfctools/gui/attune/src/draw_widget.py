@@ -327,6 +327,167 @@ class MyDrawWidget(QtWidgets.QWidget):
                 return
 
 
+    def draw_bezier(self,qp,x0,y0,xf,yf,xi,yi):
+        """
+        draws a bezier line between x0,y0,xf and yf via xi,yi
+        """
+
+        # add offset
+        dx = 0
+        dy = 0
+
+        # first quadrant (bottom right)
+        if xf >= x0 and yf >= y0:
+            x0 += 10
+            xf -= 10
+
+        # second quadrant (bottom left)
+        if xf < x0 and yf >= y0:
+            pass
+
+        # third quadrant (top left)
+        if xf < x0 and yf < y0:
+            pass
+
+        # fourth quadrant (top right)
+        if xf >= x0 and yf < y0:
+            pass
+
+
+
+
+        t_vals = [0,0.2,0.4,0.6,0.8,1.0,1.1]
+        points = []
+        for t in t_vals:
+            x_temp = (1-t)*((1-t)*x0+t*xi) + t*((1-t)*xi + t*xf)
+            y_temp = (1-t)*((1-t)*y0+t*yi) + t*((1-t)*yi + t*yf)
+
+            points.append((x_temp,y_temp))
+
+        for i in range(len(points)-2):
+            qp.drawLine(points[i][0],points[i][1],points[i+1][0],points[i+1][1])
+
+
+
+    def curved_connector(self,qp,x0,y0,xf,yf,xi,yi):
+        """
+        draws a curved connector
+        """
+
+        # construct helper box_positions
+        xi2 = 0.5*(xi-x0) + x0
+        xi3 = 0.5*(xf-xi) + xi
+        yi2 = 0.5*(yi-y0) + y0
+        yi3 = 0.5*(yf-yi) + yi
+
+        #qp.drawRect(xi2-5,yi2-5,10,10)
+        #qp.drawRect(xi3-5,yi3-5,10,10)
+
+        xi4 = xi
+        yi4 = yi
+        xi5 = xf
+        yi5 = yf
+
+        # first quadrant (bottom right)
+        if xf >= xi and yf >= yi and abs(xi-xf) >30:
+            xi4 = xi+30
+            yi4 = yi
+            xi5 = xf-30
+            yi5 = yf
+
+        # second quadrant (bottom left)
+        if xf < xi and yf >= yi and abs(xi-xf) >30:
+            xi4 = xi-30
+            yi4 = yi
+            xi5 = xf+30
+            yi5 = yf
+
+        # third quadrant (top left)
+        if xf < xi and yf < yi and abs(xi-xf) >30:
+            xi4 = xi-30
+            yi4 = yi
+            xi5 = xf+30
+            yi5 = yf
+
+        # fourth quadrant (top right)
+        if xf >= xi and yf < yi and abs(xi-xf) >30:
+            xi4 = xi+30
+            yi4 = yi
+            xi5 = xf-30
+            yi5 = yf
+
+        xi6 = x0
+        yi6 = y0
+        xi7 = xi
+        yi7 = yi
+
+
+        # first quadrant (bottom right)
+        if xi >= x0 and yi >= y0 and abs(xi-x0) >30:
+            xi6 = x0+30
+            yi6 = y0
+            xi7 = xi-30
+            yi7 = yi
+
+        # second quadrant (bottom left)
+        if xi < x0 and yi >= y0 and abs(xi-x0) >30:
+            xi6 = x0-30
+            yi6 = y0
+            xi7 = xi+30
+            yi7 = yi
+
+        # third quadrant (top left)
+        if xi < x0 and yi < y0 and abs(xi-x0) >30:
+            xi6 = x0-30
+            yi6 = y0
+            xi7 = xi+30
+            yi7 = yi
+
+        # fourth quadrant (top right)
+        if xi >= x0 and yi < y0 and abs(xi-x0) >30:
+            xi6 = x0+30
+            yi6 = y0
+            xi7 = xi-30
+            yi7 = yi
+
+
+        #qp.drawRect(xi4-5,yi4-5,10,10)
+        #qp.drawRect(xi5-5,yi5-5,10,10)
+        #qp.drawRect(xi6-5,yi6-5,10,10)
+        #qp.drawRect(xi7-5,yi7-5,10,10)
+
+        xi62 = 0.5*(xi6+xi2)
+        yi62 = 0.5*(yi6+yi2)
+
+        qp.drawLine(x0,y0,xi6,yi6)
+        qp.drawLine(xi6,yi6,xi62,yi62)
+        qp.drawLine(xi62,yi62,xi2,yi2)
+        qp.drawLine(xi2,yi2,xi,yi)
+        qp.drawLine(xi,yi,xi3,yi3)
+
+        xi35 = 0.5*(xi3+xi5)
+        yi35 = 0.5*(yi3+yi5)
+
+        qp.drawLine(xi3,yi3,xi3,yi3)
+        qp.drawLine(xi3,yi3,xi35,yi35)
+        qp.drawLine(xi35,yi35,xi5,yi5)
+        qp.drawLine(xi5,yi5,xf,yf)
+
+        # points are [y0,xi6,xi2,xi3,xi5,xf]
+
+        # qp.drawLine(xi2,yi2,xi5,yi5)
+
+        #qp.drawLine(xi2,yi2,xi7,yi7)
+        #qp.drawLine(xi7,yi7,xf,yf)
+
+        #qp.drawLine(xi2,yi2,xf,yf)
+
+        #self.draw_bezier(qp,xi4,yi4,xi5,yi5,xi3,yi3) # starting point
+        #self.draw_bezier(qp,xi7,yi7,xi6,yi6,xi2,yi2) # starting point
+        #self.draw_bezier(qp,xi,yi,xi3,yi3,xi7,yi7) # starting point
+        #self.draw_bezier(qp,xi3,yi3,xf,yf,xi5,yi5) # starting point
+
+
     def paintEvent(self, event):
 
         qp = QtGui.QPainter(self)
@@ -344,8 +505,10 @@ class MyDrawWidget(QtWidgets.QWidget):
 
             qp.setPen(pen)
 
-            qp.drawLine(int(conn.a.x+25), int(conn.a.y+25), int(conn.c.x+5), int(conn.c.y+5))
-            qp.drawLine(int(conn.c.x+5), int(conn.c.y+5), int(conn.b.x+25), int(conn.b.y+25))
+            # qp.drawLine(int(conn.a.x+25), int(conn.a.y+25), int(conn.c.x+5), int(conn.c.y+5))
+            # qp.drawLine(int(conn.c.x+5), int(conn.c.y+5), int(conn.b.x+25), int(conn.b.y+25))
+            self.curved_connector(qp,int(conn.a.x+25), int(conn.a.y+25),int(conn.b.x+25), int(conn.b.y+25),int(conn.c.x+5), int(conn.c.y+5))
+            # self.curved_connector(qp,int(conn.a.x), int(conn.a.y),int(conn.b.x), int(conn.b.y),int(conn.c.x), int(conn.c.y))
 
         pen = QtGui.QPen(QtGui.QColor(0, 0,0 , 200),1) # ,2, Qt.SolidLine)
         qp.setPen(pen)
