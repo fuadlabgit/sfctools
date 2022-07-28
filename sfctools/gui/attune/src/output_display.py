@@ -38,9 +38,9 @@ class OutputDisplay(QtWidgets.QDialog):
     def __init__(self,parent,path=""):
 
         super(OutputDisplay, self).__init__(parent) # Call the inherited classes __init__ method
-        path = os.path.dirname(os.path.abspath(__file__))
-        uic.loadUi(os.path.join(path,'output_display.ui'), self) # Load the .ui file
-        
+        ui_path = os.path.dirname(os.path.abspath(__file__))
+        uic.loadUi(os.path.join(ui_path,'output_display.ui'), self) # Load the .ui file
+
         self.data_idx = 0
         self.data = None
 

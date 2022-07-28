@@ -229,7 +229,10 @@ hyperparams:
         # shows the logger display for output quantities
 
         try:
+
             path = os.path.dirname(self.current_file)+"/output/"
+            print("[DEBUG MESSAGE] open output display in path", path)
+            
             output_display = OutputDisplay(self,path = path)
         except Exception as e:
             self.notify(str(e),title="Error")
