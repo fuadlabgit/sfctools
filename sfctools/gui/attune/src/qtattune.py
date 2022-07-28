@@ -250,7 +250,8 @@ hyperparams:
             self.statusBar().showMessage("Saved " + self.current_file)
 
         except Exception as e:
-            self.notify(str(e),title="Exception")
+            # self.notify(str(e),title="Exception")
+            print(str(e))
 
     def run_project(self):
 
@@ -453,7 +454,7 @@ def run():
                 self.gen_code() # generate transactions.py
 
         except Exception as e:
-            self.notify(str(e),title="Error on Project Build")
+            self.notify("Could not build project.",title="Error on Project Build")
 
     def auto_backup(self):
         try:
@@ -839,6 +840,7 @@ def run():
 
         try:
 
+
             filename = self.current_file # statusBar().currentMessage()
 
             if filename is not None:
@@ -852,7 +854,10 @@ def run():
                 self.save_dlg()
 
         except Exception as e:
-            self.notify(str(e),title="Error")
+            if filename != "":
+                self.notify(str(e),title="Error")
+            
+
 
     def save_dlg(self):
         try:
@@ -861,15 +866,17 @@ def run():
                                                os.getcwd(), "MAMBA Files (*.mamba)")[0]
             self.statusBar().showMessage("Saved file " + filename)
 
-            self.current_file = filename
+            current_file_backup = self.current_file
 
-            if filename is not None:
+            if filename is not None and filename != "":
+                self.current_file = filename
                 self.saveas(filename)
 
             # TODO maybe backup(?)
 
         except Exception as e:
-            self.notify(str(e),title="Error")
+            self.notify("Could not save project.",title="Error")
+            self.current_file = current_file_backup
 
 
     def saveas(self,filename):
@@ -2039,7 +2046,6 @@ def run():
         pass
 
 
-
     def udpate_display(self):
         try:
 
@@ -2103,7 +2109,7 @@ def run():
                 #self.parent.display()
 
         except Exception as e:
-            self.notify(str(e),"Exception")
+            print(str(e)) # self.notify(str(e),"Exception") < this should not throw an exception
 
 
 if __name__ == "__main__":
