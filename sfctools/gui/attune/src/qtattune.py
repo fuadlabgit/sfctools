@@ -232,7 +232,7 @@ hyperparams:
 
             path = os.path.dirname(self.current_file)+"/output/"
             print("[DEBUG MESSAGE] open output display in path", path)
-            
+
             output_display = OutputDisplay(self,path = path)
         except Exception as e:
             self.notify(str(e),title="Error")
@@ -247,7 +247,6 @@ hyperparams:
         self.save()
         try:
             self.build_project(silent=True)
-
             self.statusBar().showMessage("Saved " + self.current_file)
 
         except Exception as e:
@@ -508,9 +507,12 @@ def run():
         except:
             self.notify("Seems as if the projects folder does not yet exist. please create it manually in the parent directory of src", title="Projects folder")
 
+        filename_backup = self.filename
+        current_file_backup = self.current_file
+
         self.filename = filename
         self.current_file = filename
-        self.statusBar().showMessage("Opened file " + filename)
+
         try:
             print("FILENAME",filename)
 
@@ -542,6 +544,8 @@ def run():
                     except:
                         print("NO MAINLOOP FOND. SKIPPING")
 
+                    self.statusBar().showMessage("Opened file " + filename)
+
                 except:
 
                     # old format as fallback
@@ -549,11 +553,15 @@ def run():
                     self.update_table()
                     print("wARNING - FALLBACK TO OLD FILE FORMAT!")
 
-                #self.fileEdit.setText(filename)
-
+                # self.fileEdit.setText(filename)
 
         except Exception as e :
-            self.notify(message="Something went wrong when opening the file:\n %s"%str(e),title="Error")
+
+            # self.notify(message="Something went wrong when opening the file:\n %s"%str(e),title="Error")
+            self.filename = filename_backup
+            self.curent_file = current_file_backup
+            if str(self.current_file) != "":
+                self.statusBar().showMessage("Cancelled. Restored file '%s'" % str(self.current_file))
 
 
     def entry_to_vals(self,entry, agent,which):
