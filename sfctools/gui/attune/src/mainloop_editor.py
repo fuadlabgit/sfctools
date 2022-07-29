@@ -80,6 +80,7 @@ class MainLoopEditor(QtWidgets.QDialog):
         self.update()
 
     def eventFilter(self, obj, event):
+        self.update()
         if event.type() == QtCore.QEvent.KeyPress and obj is self.textEdit:
             if event.key() == QtCore.Qt.Key_Tab: # and self.text_box.hasFocus():
                 print('Tab pressed')
@@ -170,6 +171,7 @@ class MainLoopEditor(QtWidgets.QDialog):
     def text_changed(self):
         self.send_data()
         self.update_line_label()
+        self.update()
 
     def update_line_label(self):
         cursor = self.textEdit.textCursor()
@@ -184,6 +186,30 @@ class MainLoopEditor(QtWidgets.QDialog):
             self.backup_count = 0
         self.backup_count += 1
 
+    def paintEvent(self,event):
+        qp = QtGui.QPainter(self)
+        pen = QtGui.QPen(Qt.black ,1, Qt.SolidLine)
+        brush = QtGui.QBrush(Qt.black)
+        qp.setBrush(brush)
+        qp.setPen(pen)
+
+        for block_number in range(self.textEdit.document().lineCount()):
+
+            offset = self.textEdit.contentOffset()
+
+            block= self.textEdit.document().findBlockByNumber(block_number)
+            brect = self.textEdit.blockBoundingGeometry(block)
+            # print("brect", brect)
+            y = int(brect.y()+ offset.y()) + 53 #  53
+            x = int(brect.x() + 6)
+            w = brect.width()
+            h = brect.height()
+
+            if(y >= 50 and y <= 820):
+                try:
+                    qp.drawText(x,y+20,"%04i" % int(block_number))
+                except:
+                    pass
 
     def setUpEditor(self):
         self.highlighter = Highlighter()
@@ -213,12 +239,12 @@ class MainLoopEditor(QtWidgets.QDialog):
 
         # comments
         fmt = QTextCharFormat()
-        fmt.setForeground(QtGui.QColor("#161712"))
+        fmt.setForeground(QtGui.QColor("#121212"))
         self.highlighter.add_mapping(r'\"{3}[A-Za-z0-9_\n\t\wx^^    ]+\"{3}',fmt)
 
         fmt = QTextCharFormat()
         # fmt.setFontWeight(QFont.Bold)
-        fmt.setForeground(QtGui.QColor("#161712"))
+        fmt.setForeground(QtGui.QColor("#6a6a6a"))
         pattern = r'\#\s.+'
         self.highlighter.add_mapping(pattern,fmt)
 
@@ -229,7 +255,7 @@ class MainLoopEditor(QtWidgets.QDialog):
                 fmt = QTextCharFormat()
                 # fmt.setFontItalic(True)
                 fmt.setFontWeight(QFont.Bold)
-                fmt.setForeground(QtGui.QColor("#ffff2e"))
+                fmt.setForeground(QtGui.QColor("#fcf75b"))
                 fmt.setBackground(QtGui.QColor("#000000"))
                 self.highlighter.add_mapping(searchtext,fmt)
             except Exception as e:

@@ -62,7 +62,7 @@ class CodeEditor(QtWidgets.QDialog):
         self.backup_count = 0
 
         self.large_size = QtCore.QSize(1569,874)
-        self.small_size = QtCore.QSize(800,874)
+        self.small_size = QtCore.QSize(950,874)
         self.size = "small"
         self.pushButton.pressed.connect(self.switch_size)
 
@@ -99,7 +99,8 @@ class CodeEditor(QtWidgets.QDialog):
         except Exception as e:
             print(str(e))
 
-        self.highlighter_rects = []
+        self.highlighter_rects = [] # highlighter for functions
+        self.highlighter_tans = [] # highlighter for transactions
 
 
         self.count_interpr_max = 5
@@ -155,13 +156,60 @@ class CodeEditor(QtWidgets.QDialog):
             block= self.textEdit.document().findBlockByNumber(block_number)
             brect = self.textEdit.blockBoundingGeometry(block)
             # print("brect", brect)
-            y = int(brect.y()+ offset.y()) + 53
+            y = int(brect.y()+ offset.y()) + 53 #  53
             x = int(brect.x() + 6)
             w = brect.width()
             h = brect.height()
 
-            qp.drawRect(x,y+3,7,7)
+            if(y >= 50 and y <= 920):
+                qp.drawRect(x+38,y+4,7,7)
 
+        pen = QtGui.QPen(QtGui.QColor("#a69819") ,1, Qt.SolidLine)
+        qp.setPen(pen)
+        brush = QtGui.QBrush(QtGui.QColor("#a69819"))
+        qp.setBrush(brush)
+
+        for block_number in self.highlighter_tans:
+            offset = self.textEdit.contentOffset()
+
+            block= self.textEdit.document().findBlockByNumber(block_number)
+            brect = self.textEdit.blockBoundingGeometry(block)
+            # print("brect", brect)
+            y = int(brect.y()+ offset.y()) + 53 #  53
+            x = int(brect.x() + 6)
+            w = brect.width()
+            h = brect.height()
+
+            if(y >= 50 and y <= 920):
+                qp.drawRect(x+53,y+4,7,7)
+
+        pen = QtGui.QPen(Qt.gray ,1, Qt.SolidLine)
+        qp.setPen(pen)
+        brush = QtGui.QBrush(Qt.gray)
+        qp.setBrush(brush)
+
+
+        for block_number in range(self.textEdit.document().lineCount()):
+
+            offset = self.textEdit.contentOffset()
+
+            block= self.textEdit.document().findBlockByNumber(block_number)
+            brect = self.textEdit.blockBoundingGeometry(block)
+            # print("brect", brect)
+            y = int(brect.y()+ offset.y()) + 53 #  53
+            x = int(brect.x() + 6)
+            w = brect.width()
+            h = brect.height()
+
+            if(y >= 50 and y <= 920):
+                try:
+                    qp.drawText(x,y+9,"%04i" % self.linedict[int(block_number)])
+                except:
+                    self.update_interpreter()
+                    try:
+                        qp.drawText(x,y+9,"--")
+                    except:
+                        pass
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.KeyPress and obj is self.textEdit:
@@ -195,8 +243,6 @@ class CodeEditor(QtWidgets.QDialog):
         start = cursor.selectionStart()
         end = cursor.selectionEnd()
 
-
-
         text = self.textEdit.toPlainText()
 
         mystr = text[:start]
@@ -213,7 +259,6 @@ class CodeEditor(QtWidgets.QDialog):
 
         self.textEdit.setPlainText(mystr)
 
-
         cursor = self.textEdit.textCursor()
         if new_end - start > 1:
 
@@ -224,10 +269,6 @@ class CodeEditor(QtWidgets.QDialog):
 
         self.textEdit.setTextCursor(cursor)
         self.textEdit.verticalScrollBar().setValue(scroll_pos)
-
-
-
-
 
     def unindent(self):
         # inert tab for whole selection
@@ -315,9 +356,14 @@ class CodeEditor(QtWidgets.QDialog):
         code_lines = self.textEdit.toPlainText().split("\n")
 
         self.highlighter_rects = []
+        self.highlighter_tans = []
+
         for i,line in enumerate(code_lines):
             if line.startswith("+[FUN]"):
                 self.highlighter_rects.append(i)
+            elif "<~~>" in line:
+                self.highlighter_tans.append(i)
+
         # print("highlighter_rects", self.highlighter_rects)
 
     def update_line_label(self):

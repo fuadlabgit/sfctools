@@ -22,21 +22,21 @@
   <widget class="QPlainTextEdit" name="textEdit">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>50</x>
      <y>60</y>
-     <width>911</width>
+     <width>871</width>
      <height>771</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Segoe MDL2 Assets</family>
-     <pointsize>12</pointsize>
+     <family>Cascadia Code SemiLight</family>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(250, 250, 250);
-color: rgb(106, 106, 106);
+color: rgb(6, 6, 6);
 border-radius:10px;</string>
    </property>
    <property name="frameShadow">

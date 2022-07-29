@@ -459,6 +459,7 @@ class MyDrawWidget(QtWidgets.QWidget):
         xi62 = 0.5*(xi6+xi2)
         yi62 = 0.5*(yi6+yi2)
 
+
         qp.drawLine(x0,y0,xi6,yi6)
         qp.drawLine(xi6,yi6,xi62,yi62)
         qp.drawLine(xi62,yi62,xi2,yi2)
@@ -473,6 +474,8 @@ class MyDrawWidget(QtWidgets.QWidget):
         qp.drawLine(xi35,yi35,xi5,yi5)
         qp.drawLine(xi5,yi5,xf,yf)
 
+        pen = QtGui.QPen(QtGui.QColor(0, 0,0 , 255),0) # ,2, Qt.SolidLine)
+        qp.setPen(pen)
         # points are [y0,xi6,xi2,xi3,xi5,xf]
 
         # qp.drawLine(xi2,yi2,xi5,yi5)
@@ -501,7 +504,9 @@ class MyDrawWidget(QtWidgets.QWidget):
             if conn.c == self.highlighted:
                 pen = QtGui.QPen(QtGui.QColor(255, 2, 2, 255),3) # ,2, Qt.SolidLine)
             else:
-                pen = QtGui.QPen(QtGui.QColor(0, 0, 0, 200),1) # ,2, Qt.SolidLine)
+                # pen = QtGui.QPen(QtGui.QColor(0, 0, 0, 200),1) # ,2, Qt.SolidLine)
+                pen = QtGui.QPen(QtGui.QColor(0, 0,0 , 75),0) # ,2, Qt.SolidLine)
+
 
             qp.setPen(pen)
 
@@ -531,7 +536,7 @@ class MyDrawWidget(QtWidgets.QWidget):
             elif box == self.connected1:
                 br = QtGui.QBrush(QtGui.QColor(100, 10, 10, 255))
             elif box.ishelper and box != self.highlighted:
-                br = QtGui.QBrush(QtGui.QColor(0, 0, 100, 255))
+                br = QtGui.QBrush(QtGui.QColor(74, 138, 217, 255))
             elif box == self.highlighted:
                 br = QtGui.QBrush(QtGui.QColor(255, 44, 47, 255))
             else:
@@ -541,26 +546,51 @@ class MyDrawWidget(QtWidgets.QWidget):
             y = int(y)
 
             if box.ishelper:
-                qp.drawText(x,y-3,box.name)
+                qp.drawText(x,y-7,box.name)
             else:
                 #qp.drawText(x,y-3,box.name.capitalize())
-                qp.drawText(x,y-3,box.name)
+                qp.drawText(x,y-7,box.name)
 
             qp.setBrush(br)
 
             if box.ishelper:
 
-                x2 = x + 8
-                y2 = y + 8
+                x2 = x + 6
+                y2 = y + 6
 
-                qp.drawRect(QtCore.QRect(QtCore.QPoint(x,y),QtCore.QPoint(x2,y2)))
+                pen = QtGui.QPen(QtGui.QColor(0, 0, 0 , 0),0) # ,2, Qt.SolidLine)
+                qp.setPen(pen)
+
+                #qp.drawRect(QtCore.QRect(QtCore.QPoint(x,y),QtCore.QPoint(x2,y2)))
+                qp.drawEllipse(QtCore.QPoint(x+3,y+3),6, 6)
+
+                pen = QtGui.QPen(QtGui.QColor(0, 0, 0 , 200),0) # ,2, Qt.SolidLine)
+                qp.setPen(pen)
 
             else:
 
                 x2 = x + 50
                 y2 = y + 50
 
+                pen = QtGui.QPen(QtGui.QColor(0, 0,100 , 0),0) # ,2, Qt.SolidLine)
+                #br = QtGui.QBrush(QtGui.QColor(0, 0, 100, 255))
+                qp.setPen(pen)
+                # qp.setBrush(br)
+
+                qp.drawEllipse(QtCore.QPoint(x+45,y+45),11, 10)
+                qp.drawEllipse(QtCore.QPoint(x+45,y+5),11, 10)
+                qp.drawEllipse(QtCore.QPoint(x+5,y+45),11,10)
+                qp.drawEllipse(QtCore.QPoint(x+5,y+5),11, 10)
+
+                qp.drawRect(QtCore.QRect(QtCore.QPoint(x+5,y-5),QtCore.QPoint(x2-5,y+5)))
+                qp.drawRect(QtCore.QRect(QtCore.QPoint(x+5,y+45),QtCore.QPoint(x2-5,y+55)))
+
+                qp.drawRect(QtCore.QRect(QtCore.QPoint(x-6,y+1),QtCore.QPoint(x+5,y+45)))
+                qp.drawRect(QtCore.QRect(QtCore.QPoint(x+45,y+1),QtCore.QPoint(x+55,y+45)))
+
                 qp.drawRect(QtCore.QRect(QtCore.QPoint(x,y),QtCore.QPoint(x2,y2)))
+                pen = QtGui.QPen(QtGui.QColor(0, 0,0 , 255),0) # ,2, Qt.SolidLine)
+                qp.setPen(pen)
 
     def mousePressEvent(self, event):
 

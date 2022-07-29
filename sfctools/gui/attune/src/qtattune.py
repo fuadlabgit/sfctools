@@ -670,7 +670,7 @@ def run():
     def row_select(self,selection):
 
         # color the selected row
-        #gb(233, 234, 227);
+        # gb(233, 234, 227);
         try:
             if self.selection_idx is not None:
                 for i in range(self.transactionView.columnCount()):
@@ -681,59 +681,63 @@ def run():
         except:
             pass
 
-        self.selection_idx = selection
-        print("selection",selection)
+        try:
+            self.selection_idx = selection
+            print("selection",selection)
 
-        data = self.entry_data[selection]
+            data = self.entry_data[selection]
 
-        print("data", data)
+            print("data", data)
 
-        self.AssetListLeft.clear()
-        self.LiabilityListLeft.clear()
-        self.LiabilityListRight.clear()
-        self.AssetListRight.clear()
-        self.EquityListLeft.clear()
-        self.EquityListRight.clear()
+            self.AssetListLeft.clear()
+            self.LiabilityListLeft.clear()
+            self.LiabilityListRight.clear()
+            self.AssetListRight.clear()
+            self.EquityListLeft.clear()
+            self.EquityListRight.clear()
 
-        self.AssetListLeft.setPlainText(data["a1"])
-        self.AssetListRight.setPlainText(data["a2"])
-        self.LiabilityListLeft.setPlainText(data["l1"])  # +data["e1"])
-        self.LiabilityListRight.setPlainText(data["l2"]) # +data["e2"])
-        self.EquityListLeft.setPlainText(data["e1"])
-        self.EquityListRight.setPlainText(data["e2"])
+            self.AssetListLeft.setPlainText(data["a1"])
+            self.AssetListRight.setPlainText(data["a2"])
+            self.LiabilityListLeft.setPlainText(data["l1"])  # +data["e1"])
+            self.LiabilityListRight.setPlainText(data["l2"]) # +data["e2"])
+            self.EquityListLeft.setPlainText(data["e1"])
+            self.EquityListRight.setPlainText(data["e2"])
 
-        self.agent1Edit.setText(data["agent1"])
-        self.agent2Edit.setText(data["agent2"])
+            self.agent1Edit.setText(data["agent1"])
+            self.agent2Edit.setText(data["agent2"])
 
-        log_transaction = data["log transaction"] or "False"
-        self.registerFlowBox.setCurrentIndex(self.registerFlowBox.findText(str(log_transaction)))
+            log_transaction = data["log transaction"] or "False"
+            self.registerFlowBox.setCurrentIndex(self.registerFlowBox.findText(str(log_transaction)))
 
-        cashflow1 = data["cashflow1"] or "None"
-        cashflow2 = data["cashflow2"] or "None"
-        self.comboCashLeft.setCurrentIndex(self.comboCashLeft.findText(str(cashflow1)))
-        self.comboCashRight.setCurrentIndex(self.comboCashRight.findText(str(cashflow2)))
+            cashflow1 = data["cashflow1"] or "None"
+            cashflow2 = data["cashflow2"] or "None"
+            self.comboCashLeft.setCurrentIndex(self.comboCashLeft.findText(str(cashflow1)))
+            self.comboCashRight.setCurrentIndex(self.comboCashRight.findText(str(cashflow2)))
 
-        trtype = data["kind"] or "KA->KA"
-        self.editType.setCurrentIndex(self.editType.findText(str(trtype)))
+            trtype = data["kind"] or "KA->KA"
+            self.editType.setCurrentIndex(self.editType.findText(str(trtype)))
 
-        ics1 = data["income1"] or "None"
-        ics2 = data["income2"] or "None"
-        self.comboIncomeLeft.setCurrentIndex(self.comboIncomeLeft.findText(ics1))
-        self.comboIncomeRight.setCurrentIndex(self.comboIncomeRight.findText(ics2))
+            ics1 = data["income1"] or "None"
+            ics2 = data["income2"] or "None"
+            self.comboIncomeLeft.setCurrentIndex(self.comboIncomeLeft.findText(ics1))
+            self.comboIncomeRight.setCurrentIndex(self.comboIncomeRight.findText(ics2))
 
-        self.editQuantity.setText(data["quantity"])
-        self.editSubject.setText(data["subject"])
+            self.editQuantity.setText(data["quantity"])
+            self.editSubject.setText(data["subject"])
 
-        self.drawcanvas.highlight_connector(data["shortname"])
+            self.drawcanvas.highlight_connector(data["shortname"])
 
-        if "description" in data:
-            self.editDescription.setText(data["description"])
-        else:
-            self.editDescription.setText("")
-        self.editShortname.setText(data["shortname"])
+            if "description" in data:
+                self.editDescription.setText(data["description"])
+            else:
+                self.editDescription.setText("")
+            self.editShortname.setText(data["shortname"])
 
-        unidir = str(data["uni-directional"]) or "None"
-        self.comboUnidir.setCurrentIndex(self.comboUnidir.findText(unidir))
+            unidir = str(data["uni-directional"]) or "None"
+            self.comboUnidir.setCurrentIndex(self.comboUnidir.findText(unidir))
+            
+        except Exception as e:
+            self.notify(str(e),title="Error")
 
 
     def update_data(self):
@@ -856,7 +860,7 @@ def run():
         except Exception as e:
             if filename != "":
                 self.notify(str(e),title="Error")
-            
+
 
 
     def save_dlg(self):

@@ -3,7 +3,7 @@
  <class>Dialog</class>
  <widget class="QDialog" name="Dialog">
   <property name="windowModality">
-   <enum>Qt::NonModal</enum>
+   <enum>Qt::WindowModal</enum>
   </property>
   <property name="geometry">
    <rect>
@@ -12,6 +12,18 @@
     <width>1620</width>
     <height>875</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>960</width>
+    <height>875</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1620</width>
+    <height>875</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Edit Agent</string>
@@ -22,16 +34,16 @@
   <widget class="QPlainTextEdit" name="textEdit">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>80</x>
      <y>50</y>
-     <width>931</width>
+     <width>871</width>
      <height>821</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Segoe MDL2 Assets</family>
-     <pointsize>11</pointsize>
+     <family>Cascadia Mono SemiLight</family>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
@@ -100,14 +112,14 @@ border-radius:15px;</string>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>750</x>
+     <x>670</x>
      <y>10</y>
-     <width>41</width>
+     <width>101</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;-&gt;</string>
+    <string>&lt;-expand-&gt;</string>
    </property>
    <property name="default">
     <bool>true</bool>
@@ -119,7 +131,7 @@ border-radius:15px;</string>
   <widget class="QLineEdit" name="searchEdit">
    <property name="geometry">
     <rect>
-     <x>590</x>
+     <x>510</x>
      <y>10</y>
      <width>113</width>
      <height>31</height>
@@ -129,9 +141,9 @@ border-radius:15px;</string>
   <widget class="QLabel" name="lineLabel">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>541</width>
+     <x>780</x>
+     <y>840</y>
+     <width>211</width>
      <height>21</height>
     </rect>
    </property>
@@ -145,7 +157,7 @@ border-radius:15px;</string>
   <widget class="QPushButton" name="nextButton">
    <property name="geometry">
     <rect>
-     <x>710</x>
+     <x>630</x>
      <y>10</y>
      <width>31</width>
      <height>31</height>
@@ -158,7 +170,7 @@ border-radius:15px;</string>
   <widget class="QLabel" name="lineLabel_2">
    <property name="geometry">
     <rect>
-     <x>540</x>
+     <x>460</x>
      <y>10</y>
      <width>51</width>
      <height>21</height>
