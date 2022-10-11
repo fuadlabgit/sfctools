@@ -11,11 +11,11 @@ author:
   - "Thomas Baldauf"
 authors:
   - name: Thomas Baldauf
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-9119-7413
     equal-contrib: true
     affiliation: 1 
 affiliations:
- - name:  German Aerospace Center (DLR), Institute of Networked Energy Systems (VE)
+ - name:  Institute of Networked Energy Systems, German Aerospace Center (DLR-VE)
    index: 1
 
 date: 06 October 2022
