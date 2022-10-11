@@ -8,7 +8,7 @@ The JOSS paper can be found in this repository.
 
 # Code Repository 
 
-The code repository has been set up at gitlab.com/dlr-ve/esy/sfctools/framework/
+The code repository has been set up at https://gitlab.com/dlr-ve/esy/sfctools/framework/
 
 
 | Author Thomas Baldauf, German Aerospace Center (DLR), Curiestr. 4 70563 Stuttgart | thomas.baldauf@dlr.de | 
