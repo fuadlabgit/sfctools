@@ -12,10 +12,9 @@ author:
 authors:
   - name: Thomas Baldauf
     orcid: 0000-0002-9119-7413
-    equal-contrib: true
-    affiliation: 1 
+    affiliation: 1
 affiliations:
- - name:  Institute of Networked Energy Systems, German Aerospace Center (DLR-VE)
+ - name:  Institute of Networked Energy Systems, German Aerospace Center
    index: 1
 
 date: 06 October 2022
@@ -28,13 +27,13 @@ One of the most challenging tasks in macroeconomic models is to describe the mac
 
 # Statement of need
 
- **sfctools** is an ABM-SFC modeling toolbox, which i) relies on transparent and robust data structures for economic agents, ii) comes along with a simple descriptive modeling approach for agents, iii) provides an easy project builder for Python, making the software runnable and accessible on a large number of platforms, and iv) is also manageable from a graphical user interface for ABM-SFC modeling, shipped as part of the toolbox, assuring analytical SFC-check and double accounting consistency. The package is shipped in the form of an open-source project. Unlike more generic frameworks like [*mesa*](https://github.com/projectmesa/mesa/) or [*AgentPy*](https://github.com/joelforamitti/agentpy) [@Foramitti2021], it concentrates on agents in economics. 
+ **sfctools** is an ABM-SFC modeling toolbox, which i) relies on transparent and robust data structures for economic agents, ii) comes along with a simple descriptive modeling approach for agents, iii) provides an easy project builder for Python, making the software runnable and accessible on a large number of platforms, and iv) is also manageable from a graphical user interface for ABM-SFC modeling, shipped as part of the toolbox, assuring analytical SFC-check and double accounting consistency. The package is shipped in the form of an open-source project. Unlike more generic frameworks like [*mesa*](https://github.com/projectmesa/mesa/) or [*AgentPy*](https://github.com/joelforamitti/agentpy) [@Foramitti2021], it concentrates on agents in economics.
 *sfctools* was designed to be used by both engineering-oriented and economics-oriented scholars who have basic education in both fields. It can be used by a single developer or by a small development team, splitting the work of model creation in terms of consistency and economic logic from the actual programming and technical implementation. This allows software solutions from rapid prototyping up to more sophisticated, medium-sized ABMs. Sfctools is therefore a versatile virtual laboratory for agent-based economics.
 
-# Basic structure 
+# Basic structure
 ![Overview of the sfctools toolbox. \label{struct}](overview.pdf)
 
-Figure \ref{struct} Shows the basic structure of the modeling framework. The framework designed to complement an efficient model creation workflow. Users can either program their models directly, using the sfctools Python package, or can use the graphical user interface to design their models at all stages. This refers to the implementation of behavioral rules and structural parameters (green boxes), and the design of a set of individual balance sheet transactions (plain gray box). Once the basic model setup is created, the users can check for stock-flow consistency by analytically examining the transaction flow matrix, taking all theoretically allowed balance sheet transactions into account. When running the model, the aggregate and disaggregate transaction flow matrix is available also as a numerical result. The same is true for data structures on the individual agent level (yellow box): the balance sheets, income statements and cashflow statements of individuals can be consistently logged and accessed on runtime or ex-post. In the background, the sfctools core framework will take care of all computational operations and thereby assure stock-flow consistency at all times. 
+Figure \ref{struct} Shows the basic structure of the modeling framework. The framework designed to complement an efficient model creation workflow. Users can either program their models directly, using the sfctools Python package, or can use the graphical user interface to design their models at all stages. This refers to the implementation of behavioral rules and structural parameters (green boxes), and the design of a set of individual balance sheet transactions (plain gray box). Once the basic model setup is created, the users can check for stock-flow consistency by analytically examining the transaction flow matrix, taking all theoretically allowed balance sheet transactions into account. When running the model, the aggregate and disaggregate transaction flow matrix is available also as a numerical result. The same is true for data structures on the individual agent level (yellow box): the balance sheets, income statements and cashflow statements of individuals can be consistently logged and accessed on runtime or ex-post. In the background, the sfctools core framework will take care of all computational operations and thereby assure stock-flow consistency at all times.
 
 ![Screenshot of the user interface. \label{attune}](attune.png)
 
@@ -50,7 +49,7 @@ The model creation workflow is as follows
 
 2. Set up the transactions (edges). Agent A is a consumer and is affected both by transaction 1 and by transaction 2, agent B is a bank and is affected only by transaction 1, agent C is a consumption good producer and is affected only by transaction 2.
 
-Once the transactions are registered in the project, they can be deliberately used during the simulation by importing them from an atuomatically-generated *transaction.py* file. 
+Once the transactions are registered in the project, they can be deliberately used during the simulation by importing them from an atuomatically-generated *transaction.py* file.
 
 3. Generate transaction flow matrix: to ensure our model is fully stock-flow consistent, we check if all rows and columns of the transaction flow matrix sum up to zero.
 
@@ -63,7 +62,7 @@ Once the transactions are registered in the project, they can be deliberately us
 
 3. Insert behavioral rules for the agents
 
-4. By exporting our model to python code via saving the project from the GUI, we automatically generate a fully consistent model, usable in any python script. 
+4. By exporting our model to python code via saving the project from the GUI, we automatically generate a fully consistent model, usable in any python script.
 
 Thanks to the user friendliness of sfctools, there is little work to be done in terms of coding. In the GUI, we have the possibility to code the three agents in the (python-based) **MA**croecono**M**ic agent**BA**sed language (**MAMBA** language), a custom-designed agent description language for *sfctools-attune*. The MAMBA code is complemented by a simple Python script to finally run the model. The full example can be found on the project documentation page (sfctools-framework.readthedocs.io/en/latest/ > Examples). 
 
