@@ -4,7 +4,8 @@ Sfctools is a lightweight and easy-to-use Python framework for agent-based macro
 
 # Paper 
 
-The software was submitted to the journal of open source software (JOSS). 
+The software was submitted to the journal of open source software (JOSS). Paper: [![status](https://joss.theoj.org/papers/1ba3edb21815b1031c14eb36911e9b21/status.svg)](https://joss.theoj.org/papers/1ba3edb21815b1031c14eb36911e9b21)
+
 The review process is transparent and open, and can be seen here https://github.com/openjournals/joss-reviews/issues/4980
 
 # Code Repository 
