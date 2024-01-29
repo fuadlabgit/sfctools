@@ -2,6 +2,10 @@
 
 Sfctools is a lightweight and easy-to-use Python framework for agent-based macroeconomic, stock-flow consistent (ABM-SFC) modeling. It concentrates on agents in economics and helps you to construct agents, helps you to manage and document your model parameters, assures stock-flow consistency, and facilitates basic economic data structures (such as the balance sheet).
 
+# Current Version 
+
+Find the current release at PyPi: https://pypi.org/project/sfctools/
+
 # Paper 
 
 The software was submitted to the journal of open source software (JOSS). Paper: [![status](https://joss.theoj.org/papers/1ba3edb21815b1031c14eb36911e9b21/status.svg)](https://joss.theoj.org/papers/1ba3edb21815b1031c14eb36911e9b21)
